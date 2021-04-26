@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Semperton\Porter\Emitter;
 
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
+
 use const CONNECTION_NORMAL;
 
 final class SapiEmitter implements EmitterInterface
@@ -19,12 +21,14 @@ final class SapiEmitter implements EmitterInterface
 
 	public function emit(ResponseInterface $response): void
 	{
-		if (headers_sent()) {
-			throw new EmitterException('Headers already sent, unable to emit response');
+		$filename = $line = null;
+
+		if (headers_sent($filename, $line)) {
+			throw new RuntimeException("Headers already sent in < $filename > on line < $line >, unable to emit response");
 		}
 
 		if (ob_get_level() > 0 && ob_get_length() > 0) {
-			throw new EmitterException('Output already startet, unable to emit response');
+			throw new RuntimeException('Output already startet, unable to emit response');
 		}
 
 		$responseEmpty = $this->isResponseEmpty($response);

@@ -12,7 +12,7 @@ final class SapiEmitter implements EmitterInterface
 	/** @var int */
 	protected $chunkSize;
 
-	public function __construct(int $chunkSize = 1024 * 4)
+	public function __construct(int $chunkSize = 4096)
 	{
 		$this->chunkSize = $chunkSize;
 	}
@@ -63,6 +63,8 @@ final class SapiEmitter implements EmitterInterface
 
 	protected function sendBody(ResponseInterface $response): void
 	{
+		ob_implicit_flush();
+
 		$stream = $response->getBody();
 
 		if ($this->chunkSize < 1) {

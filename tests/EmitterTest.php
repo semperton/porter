@@ -7,8 +7,8 @@ namespace Semperton\Porter;
 use Nyholm\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use Semperton\Porter\Emitter\EmitterException;
 use Semperton\Porter\Emitter\SapiEmitter;
+use RuntimeException;
 
 final class EmitterTest extends TestCase
 {
@@ -19,8 +19,8 @@ final class EmitterTest extends TestCase
 
 	public function testHeadersAlreadySent(): void
 	{
-		$this->expectException(EmitterException::class);
-		$this->expectExceptionMessage('Headers already sent, unable to emit response');
+		$this->expectException(RuntimeException::class);
+		// Headers already sent in < \vendor\phpunit\phpunit\src\Util\Printer.php > on line < 104 >, unable to emit response
 
 		$response = $this->newResponse();
 		$emitter = new SapiEmitter();
@@ -33,7 +33,7 @@ final class EmitterTest extends TestCase
 	 */
 	public function testOutputAlreadyStarted(): void
 	{
-		$this->expectException(EmitterException::class);
+		$this->expectException(RuntimeException::class);
 		$this->expectExceptionMessage('Output already startet, unable to emit response');
 
 		echo '0';
@@ -42,5 +42,25 @@ final class EmitterTest extends TestCase
 		$emitter = new SapiEmitter();
 
 		$emitter->emit($response);
+	}
+
+	/**
+	 * @runInSeparateProcess
+	 */
+	public function testEmitResponse(): void
+	{
+		$response = $this->newResponse();
+		$emitter = new SapiEmitter();
+
+		$message = 'Hello World';
+		$response->getBody()->write($message);
+
+		ob_start();
+
+		$emitter->emit($response);
+
+		$contents = ob_get_clean();
+
+		$this->assertEquals($message, $contents);
 	}
 }

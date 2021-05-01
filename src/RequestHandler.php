@@ -36,14 +36,17 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 
 		$middleware = $this->middleware->current();
 
-		if (!($middleware instanceof MiddlewareInterface) && $this->resolver !== null) {
-			/** @var object */
-			$middleware = ($this->resolver)($middleware);
-		}
-
 		if (!($middleware instanceof MiddlewareInterface)) {
-			$type = gettype($middleware);
-			throw new RuntimeException("Type < $type > is not a valid MiddlewareInterface");
+
+			if ($this->resolver !== null) {
+				/** @var object */
+				$middleware = ($this->resolver)($middleware);
+			}
+
+			if (!($middleware instanceof MiddlewareInterface)) {
+				$type = gettype($middleware);
+				throw new RuntimeException("Type < $type > is not a valid MiddlewareInterface");
+			}
 		}
 
 		$this->middleware->next();

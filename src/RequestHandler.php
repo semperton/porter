@@ -12,6 +12,8 @@ use OutOfBoundsException;
 use Iterator;
 use RuntimeException;
 
+use function gettype;
+
 final class RequestHandler implements RequestHandlerInterface, MiddlewareInterface
 {
 	/** @var Iterator */

@@ -9,6 +9,15 @@ use RuntimeException;
 
 use const CONNECTION_NORMAL;
 
+use function headers_sent;
+use function ob_get_level;
+use function ob_get_length;
+use function header;
+use function strtolower;
+use function ob_implicit_flush;
+use function connection_status;
+use function in_array;
+
 final class SapiEmitter implements EmitterInterface
 {
 	/** @var int */

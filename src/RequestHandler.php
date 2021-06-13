@@ -47,7 +47,7 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 
 			if (!($middleware instanceof MiddlewareInterface)) {
 				$type = gettype($middleware);
-				throw new RuntimeException("Type < $type > is not a valid MiddlewareInterface");
+				throw new RuntimeException("Unable to resolve middleware, < $type > is not a valid MiddlewareInterface");
 			}
 		}
 

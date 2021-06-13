@@ -13,27 +13,27 @@ use Throwable;
 
 final class RequestRunner
 {
+	/** @var callable */
+	protected $serverRequestCreator;
+
 	/** @var RequestHandlerInterface */
 	protected $requestHandler;
 
 	/** @var EmitterInterface */
 	protected $responseEmitter;
 
-	/** @var callable */
-	protected $serverRequestGenerator;
-
 	/** @var callable|null */
 	protected $errorHandler;
 
 	public function __construct(
+		callable $serverRequestCreator,
 		RequestHandlerInterface $requestHandler,
 		EmitterInterface $responseEmitter,
-		callable $serverRequestGenerator,
 		?callable $errorHandler = null
 	) {
+		$this->serverRequestCreator = $serverRequestCreator;
 		$this->requestHandler = $requestHandler;
 		$this->responseEmitter = $responseEmitter;
-		$this->serverRequestGenerator = $serverRequestGenerator;
 		$this->errorHandler = $errorHandler;
 	}
 
@@ -41,7 +41,7 @@ final class RequestRunner
 	{
 		try {
 			/** @var ServerRequestInterface */
-			$request = ($this->serverRequestGenerator)();
+			$request = ($this->serverRequestCreator)();
 			$response = $this->requestHandler->handle($request);
 
 			$this->responseEmitter->emit($response);

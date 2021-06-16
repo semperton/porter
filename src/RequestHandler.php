@@ -12,6 +12,7 @@ use OutOfBoundsException;
 use Iterator;
 use RuntimeException;
 
+use function is_callable;
 use function gettype;
 
 final class RequestHandler implements RequestHandlerInterface, MiddlewareInterface
@@ -36,22 +37,39 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 			throw new OutOfBoundsException('End of middleware stack, no response was returned');
 		}
 
+		/** @var mixed */
 		$middleware = $this->middleware->current();
-
-		if (!($middleware instanceof MiddlewareInterface)) {
-
-			/** @var mixed */
-			$middleware = ($this->resolver)($middleware);
-
-			if (!($middleware instanceof MiddlewareInterface)) {
-				$type = gettype($middleware);
-				throw new RuntimeException("Unable to resolve middleware, < $type > is not a valid MiddlewareInterface");
-			}
-		}
 
 		$this->middleware->next();
 
-		return $middleware->process($request, $this);
+		if (
+			!($middleware instanceof MiddlewareInterface) &&
+			!($middleware instanceof RequestHandlerInterface) &&
+			!is_callable($middleware)
+		) {
+
+			/** @var mixed */
+			$middleware = ($this->resolver)($middleware);
+		}
+
+		if ($middleware instanceof MiddlewareInterface) {
+
+			return $middleware->process($request, $this);
+		}
+
+		if ($middleware instanceof RequestHandlerInterface) {
+
+			return $middleware->handle($request);
+		}
+
+		if (is_callable($middleware)) {
+
+			/** @var ResponseInterface */
+			return $middleware($request, $this);
+		}
+
+		$type = gettype($middleware);
+		throw new RuntimeException("Unable to resolve middleware, < $type > is not a valid Middleware");
 	}
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -70,15 +88,6 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 	 */
 	protected function resolve($middleware)
 	{
-		if (is_callable($middleware)) {
-			return $middleware();
-		}
-
-		if (is_string($middleware) && class_exists($middleware)) {
-			/** @psalm-suppress MixedMethodCall */
-			return new $middleware();
-		}
-
-		return null;
+		return $middleware;
 	}
 }

@@ -19,13 +19,13 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 	/** @var Iterator */
 	protected $middleware;
 
-	/** @var null|callable */
+	/** @var callable */
 	protected $resolver;
 
 	public function __construct(Iterator $middleware, ?callable $resolver = null)
 	{
 		$this->middleware = $middleware;
-		$this->resolver = $resolver;
+		$this->resolver = $resolver ?? [$this, 'resolve'];
 
 		$this->middleware->rewind();
 	}
@@ -40,10 +40,8 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 
 		if (!($middleware instanceof MiddlewareInterface)) {
 
-			if ($this->resolver !== null) {
-				/** @var object */
-				$middleware = ($this->resolver)($middleware);
-			}
+			/** @var mixed */
+			$middleware = ($this->resolver)($middleware);
 
 			if (!($middleware instanceof MiddlewareInterface)) {
 				$type = gettype($middleware);
@@ -64,5 +62,23 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 		}
 
 		return $handler->handle($request);
+	}
+
+	/**
+	 * @param mixed $middleware
+	 * @return mixed
+	 */
+	protected function resolve($middleware)
+	{
+		if (is_callable($middleware)) {
+			return $middleware();
+		}
+
+		if (is_string($middleware) && class_exists($middleware)) {
+			/** @psalm-suppress MixedMethodCall */
+			return new $middleware();
+		}
+
+		return null;
 	}
 }

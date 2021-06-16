@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Semperton\Porter;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use RuntimeException;
 use Semperton\Porter\Emitter\EmitterInterface;
+use RuntimeException;
 use Throwable;
 
 final class RequestRunner
@@ -48,13 +47,10 @@ final class RequestRunner
 		} catch (Throwable $exception) {
 
 			if ($this->errorHandler === null) {
-				throw new RuntimeException('Unable to generate response for exception', 0, $exception);
+				throw new RuntimeException('Unable to handle exception', 0, $exception);
 			}
 
-			/** @var ResponseInterface */
-			$response = ($this->errorHandler)($exception);
-
-			$this->responseEmitter->emit($response);
+			($this->errorHandler)($exception);
 		}
 	}
 }

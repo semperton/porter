@@ -60,7 +60,7 @@ final class HandlerTest extends TestCase
 	public function testInvalidMiddleware(): void
 	{
 		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage('Unable to resolve middleware, < string > is not a valid MiddlewareInterface');
+		$this->expectExceptionMessage('Unable to resolve middleware, < string > is not a valid Middleware');
 
 		$middleware = new ArrayIterator([
 			'SomeMiddleware',

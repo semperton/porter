@@ -74,9 +74,9 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		if ($this->middleware->valid()) {
-
+		try {
 			return $this->handle($request);
+		} catch (OutOfBoundsException $e) {
 		}
 
 		return $handler->handle($request);

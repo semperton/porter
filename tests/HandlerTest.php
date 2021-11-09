@@ -69,4 +69,24 @@ final class HandlerTest extends TestCase
 
 		$handler->handle($this->request);
 	}
+
+	public function testSubHandler(): void
+	{
+		$resolver = new MiddlewareResolver();
+
+		$middleware = new ArrayIterator([
+			new MockMiddleware,
+			new RequestHandler(new ArrayIterator([
+				MockMiddleware::class,
+				MockMiddleware::class
+			]), $resolver),
+			MockMiddleware::class,
+			$this->responder
+		]);
+		$handler = new RequestHandler($middleware, $resolver);
+
+		$response = $handler->handle($this->request);
+
+		$this->assertEquals('74', (string)$response->getBody());
+	}
 }

@@ -20,33 +20,39 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 	/** @var Iterator */
 	protected $middleware;
 
-	/** @var callable */
+	/** @var null|callable */
 	protected $resolver;
 
-	public function __construct(Iterator $middleware, ?callable $resolver = null)
-	{
-		$this->middleware = $middleware;
-		$this->resolver = $resolver ?? [$this, 'resolve'];
+	/** @var null|RequestHandlerInterface */
+	protected $delegate;
 
-		$this->middleware->rewind();
+	public function __construct(
+		Iterator $middleware,
+		?callable $resolver = null,
+		?RequestHandlerInterface $delegate = null
+	) {
+		$this->middleware = $middleware;
+		$this->resolver = $resolver;
+		$this->delegate = $delegate;
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
 		if (!$this->middleware->valid()) {
+
+			if ($this->delegate) {
+				return $this->delegate->handle($request);
+			}
+
 			throw new OutOfBoundsException('End of middleware stack, no response was returned');
 		}
 
-		/** @var mixed */
+		/** @var null|mixed */
 		$middleware = $this->middleware->current();
 
 		$this->middleware->next();
 
-		if (
-			!($middleware instanceof MiddlewareInterface) &&
-			!($middleware instanceof RequestHandlerInterface) &&
-			!is_callable($middleware)
-		) {
+		if ($this->resolver) {
 
 			/** @var mixed */
 			$middleware = ($this->resolver)($middleware);
@@ -74,20 +80,6 @@ final class RequestHandler implements RequestHandlerInterface, MiddlewareInterfa
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		try {
-			return $this->handle($request);
-		} catch (OutOfBoundsException $e) {
-		}
-
-		return $handler->handle($request);
-	}
-
-	/**
-	 * @param mixed $middleware
-	 * @return mixed
-	 */
-	protected function resolve($middleware)
-	{
-		return $middleware;
+		return (new self($this->middleware, $this->resolver, $handler))->handle($request);
 	}
 }

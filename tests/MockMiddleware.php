@@ -19,7 +19,7 @@ final class MockMiddleware implements MiddlewareInterface
 		$count = ++self::$count;
 
 		$response = $handler->handle($request);
-		$response->getBody()->write((string)$count);
+		$response->getBody()->write('-' . (string)$count);
 		return $response;
 	}
 }

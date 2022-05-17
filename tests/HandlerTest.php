@@ -26,8 +26,12 @@ final class HandlerTest extends TestCase
 	{
 		$this->request = new ServerRequest('GET', 'https://www.example.net');
 		$this->responder = function ($request, $handler) {
-			return new Response();
+			$response = new Response();
+			$response->getBody()->write('R');
+			return $response;
 		};
+
+		MockMiddleware::$count = 0;
 	}
 
 	public function testEmptyMiddlewareStack(): void
@@ -54,7 +58,7 @@ final class HandlerTest extends TestCase
 
 		$response = $handler->handle($this->request);
 
-		$this->assertEquals('321', (string)$response->getBody());
+		$this->assertEquals('R-3-2-1', (string)$response->getBody());
 	}
 
 	public function testInvalidMiddleware(): void
@@ -87,6 +91,6 @@ final class HandlerTest extends TestCase
 
 		$response = $handler->handle($this->request);
 
-		$this->assertEquals('74', (string)$response->getBody());
+		$this->assertEquals('R-4-3-2-1', (string)$response->getBody());
 	}
 }

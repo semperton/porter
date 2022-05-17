@@ -21,7 +21,7 @@ final class RequestRunner
 	/** @var EmitterInterface */
 	protected $responseEmitter;
 
-	/** @var callable|null */
+	/** @var null|callable */
 	protected $errorHandler;
 
 	public function __construct(

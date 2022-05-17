@@ -14,7 +14,11 @@ final class MiddlewareResolver
 {
 	public function __invoke($middleware): MiddlewareInterface
 	{
-		if (is_string($middleware)) {
+		if ($middleware instanceof MiddlewareInterface) {
+			return $middleware;
+		}
+
+		if (is_string($middleware) && class_exists($middleware)) {
 			return new $middleware();
 		}
 

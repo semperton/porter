@@ -1,13 +1,12 @@
 <div align="center">
 <a href="https://github.com/semperton">
-<img src="https://avatars0.githubusercontent.com/u/76976189?s=140" alt="Semperton">
+<img width="140" src="https://raw.githubusercontent.com/semperton/misc/main/readme-logo.svg" alt="Semperton">
 </a>
 <h1>Semperton Porter</h1>
 <p>PSR-15 HTTP request handler and response emitter components.</p>
-//
 </div>
 
-<hr>
+---
 
 ## Installation
 

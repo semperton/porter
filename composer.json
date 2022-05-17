@@ -24,6 +24,7 @@
 		"nyholm/psr7": "^1.4"
 	},
 	"scripts": {
-		"test": "phpunit tests"
+		"test": "phpunit tests",
+		"check": "psalm"
 	}
 }
